@@ -1,0 +1,93 @@
+import json
+import os
+
+# 1️⃣ Current Python file ka folder automatically detect karo
+base_path = os.path.dirname(__file__)
+file_path = os.path.join(base_path, "portfolio.json")  # portfolio.json ka full path
+
+# 2️⃣ Stocks prices dictionary
+stocks = {
+    "tsla": 140,
+    "aapl": 20,
+    "hsn": 23,
+}
+
+# 3️⃣ Load existing portfolio if file exists
+if os.path.exists(file_path):
+    with open(file_path, "r") as f:
+        try:
+            portfolio = json.load(f)  # JSON file read → Python dict
+        except json.JSONDecodeError:
+            portfolio = {}  # agar file empty ya invalid ho
+else:
+    portfolio = {}  # file exist nahi → empty dict
+
+# 4️⃣ Function to add stock
+def add_stock():
+    global portfolio
+    while True:
+        user = input("Enter stock name (or 'done' to go back): ").strip().lower()
+        if user == "done":
+            break
+
+        if user not in stocks:
+            print("Stock not available ❌")
+            continue
+
+        print(f"{user} price: {stocks[user]}")
+
+        quantity = input("Enter quantity: ")
+        if not quantity.isdigit():
+            print("Invalid quantity ❌")
+            continue
+        quantity = int(quantity)
+
+        # Update portfolio dictionary
+        if user in portfolio:
+            portfolio[user] += quantity
+        else:
+            portfolio[user] = quantity
+
+        # 5️⃣ Write the full portfolio in 'w' mode → always valid JSON
+        with open(file_path, "w") as f:
+            json.dump(portfolio, f, indent=4)
+
+        print("Added successfully ✅")
+
+
+# 6️⃣ Function to show portfolio
+def show_portfolio():
+    if not portfolio:
+        print("Portfolio is empty ❌")
+        return
+
+    print("\n📊 Your Portfolio:")
+    total = 0
+
+    for stock, qty in portfolio.items():
+        price = stocks.get(stock, 0)
+        value = price * qty
+        total += value
+        print(f"{stock} → {qty} × {price} = {value}")
+
+    print("💰 Total:", total)
+
+
+# 7️⃣ Menu loop
+while True:
+    print("\n--- MENU ---")
+    print("1. Add Stock")
+    print("2. Show Portfolio")
+    print("3. Exit")
+
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        add_stock()
+    elif choice == "2":
+        show_portfolio()
+    elif choice == "3":
+        print("Exiting program...")
+        break
+    else:
+        print("Invalid choice ❌")
